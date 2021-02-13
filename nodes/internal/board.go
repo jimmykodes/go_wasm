@@ -38,7 +38,7 @@ func (b *Board) Init(this js.Value, args []js.Value) interface{} {
 		x := math.Floor(rand.Float64() * width)
 		y := math.Floor(rand.Float64() * height)
 		d := rand.Float64() * TAU
-		m := rand.Float64()
+		m := lerp(rand.Float64(), 0.1, 0.5)
 		b.points = append(b.points, newPoint(x, y, d, m, b))
 	}
 	b.initCalled = true
