@@ -20,21 +20,21 @@
     let dpr = window.devicePixelRatio
     let width = window.innerWidth - 15
     let height = window.innerHeight - 15
-    let nPoints = 400
-    let bounceBounds = true
+    const nPoints = 140
+    const bounceBounds = true
+    const kLines = 2
     canvas.width = width * dpr
     canvas.height = height * dpr
     canvas.style.width = `${width}px`
     canvas.style.height = `${height}px`
     ctx.scale(dpr, dpr)
     ctx.fillStyle = `rgb(0, 167, 167)`
-    ctx.strokeStyle = `rgba(0, 255, 255, .85)`
-    init(width, height, nPoints, bounceBounds)
-    let points
-
+    ctx.strokeStyle = `rgba(0, 255, 255, .45)`
+    init(width, height, nPoints, bounceBounds, kLines)
+    setThreshold(10000)
     let draw = function () {
       ctx.clearRect(0, 0, width, height)
-      points = getPoints()
+      let points = getPoints()
       ctx.beginPath()
       for (let i = 0; i < nPoints; i++) {
         let p = points[i]
@@ -42,6 +42,14 @@
         ctx.closePath()
       }
       ctx.fill()
+      let lines = getLines()
+      ctx.beginPath()
+      for (let i = 0; i < lines.length; i++) {
+        let l = lines[i]
+        ctx.moveTo(l.start.x, l.start.y)
+        ctx.lineTo(l.end.x, l.end.y)
+      }
+      ctx.stroke()
       updatePoints()
       window.requestAnimationFrame(draw)
     }

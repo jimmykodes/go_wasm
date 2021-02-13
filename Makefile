@@ -2,7 +2,7 @@ NODES=./nodes/main.wasm
 SQUARES=./marching_squares/main.wasm
 
 .PHONY: all
-all: nodes squares
+all: clear nodes squares
 
 nodes: ${NODES}
 
@@ -14,6 +14,7 @@ squares: ${SQUARES}
 ${SQUARES}:
 	@GOOS=js GOARCH=wasm go build -o ${SQUARES} ./marching_squares
 
+.PHONY: clear
 clear:
 	@rm ${NODES}
 	@rm ${SQUARES}
