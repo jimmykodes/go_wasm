@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WebAssembly</title>
+  <script src="wasm_exec.js"></script>
+  <script>
+    const go = new Go()
+    WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+      go.run(result.instance)
+      main()
+    })
+
+    function main() {
+      let canvas = document.getElementById("mycanvas")
+      let ctx = canvas.getContext('2d')
+      let dpr = window.devicePixelRatio
+      let width = window.innerWidth - 15
+      let height = window.innerHeight - 15
+      let threshold = .55
+
+      let numPoints = 100
+      let padding = Math.round(Math.min(width, height) / numPoints)
+      let scalar = padding * .25
+      let rows = Math.round(height / padding)
+      let cols = Math.round(width / padding)
+      initNoise(Math.round(Math.random() * 1000), threshold, cols, rows)
+
+
+      canvas.width = width * dpr
+      canvas.height = height * dpr
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
+      ctx.scale(dpr, dpr)
+
+      ctx.fillStyle = `rgba(0, 255, 255, .55)`
+      ctx.strokeStyle = `rgba(0, 255, 255, .85)`
+
+      let draw = function () {
+        ctx.clearRect(0, 0, width, height)
+        let now = new Date().getTime()
+        let data = noise(now / 2000, 10) // wasm function
+        ctx.beginPath()
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < cols; col++) {
+            key[data.keys[row][col]].draw(ctx, col * (scalar + padding), row * (scalar + padding), (scalar + padding))
+          }
+        }
+        ctx.stroke()
+        ctx.beginPath()
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < cols; col++) {
+            if (data.points[row][col] > threshold) {
+              ctx.rect(col * (scalar + padding), row * (scalar + padding), scalar, scalar)
+            }
+          }
+        }
+        ctx.fill()
+        window.requestAnimationFrame(draw)
+      }
+      window.requestAnimationFrame(draw)
+    }
+
+    class Coord {
+      constructor(x, y) {
+        this.x = x
+        this.y = y
+      }
+    }
+
+    class Line {
+      constructor(start, end) {
+        this.start = start
+        this.end = end
+      }
+    }
+
+    class Box {
+      constructor(...lines) {
+        this.lines = lines
+      }
+
+      draw(ctx, x, y, scale) {
+        this.lines.forEach(line => {
+          ctx.moveTo(line.start.x * scale + (scale / 4) + x, line.start.y * scale + (scale / 4) + y)
+          ctx.lineTo(line.end.x * scale + (scale / 4) + x, line.end.y * scale + (scale / 4) + y)
+        })
+      }
+    }
+
+    const tc = new Coord(.5, 0)
+    const bc = new Coord(.5, 1)
+    const rm = new Coord(1, .5)
+    const lm = new Coord(0, .5)
+
+    const key = {
+      0: new Box(),
+      1: new Box(new Line(lm, bc)),
+      2: new Box(new Line(rm, bc)),
+      3: new Box(new Line(lm, rm)),
+      4: new Box(new Line(tc, rm)),
+      5: new Box(new Line(tc, lm), new Line(bc, rm)),
+      6: new Box(new Line(tc, bc)),
+      7: new Box(new Line(tc, lm)),
+      8: new Box(new Line(tc, lm)),
+      9: new Box(new Line(tc, bc)),
+      10: new Box(new Line(tc, rm), new Line(bc, lm)),
+      11: new Box(new Line(tc, rm)),
+      12: new Box(new Line(lm, rm)),
+      13: new Box(new Line(bc, rm)),
+      14: new Box(new Line(bc, lm)),
+      15: new Box(),
+    }
+
+  </script>
+</head>
+<body style="background-color: black">
+<canvas id="mycanvas"></canvas>
+</body>
+</html>
