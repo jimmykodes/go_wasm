@@ -6,7 +6,7 @@
 </head>
 <body style="background-color: black">
 <canvas id="canvas"></canvas>
-<script src="wasm_exec.js"></script>
+<script src="../wasm_exec.js"></script>
 <script>
   const go = new Go()
   WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
@@ -20,7 +20,7 @@
     let dpr = window.devicePixelRatio
     let width = window.innerWidth - 15
     let height = window.innerHeight - 15
-    let nPoints = 800
+    let nPoints = 400
     let bounceBounds = true
     canvas.width = width * dpr
     canvas.height = height * dpr
