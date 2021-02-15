@@ -9,55 +9,87 @@ import (
 )
 
 type Board struct {
-	initCalled   bool
 	width        float64
 	height       float64
 	kLines       int
 	points       []*point
+	wells        []*Well
 	bounceBounds bool
 	threshold    float64
+	nPoints      int
 }
 
-func (b *Board) Init(this js.Value, args []js.Value) interface{} {
-	if b.initCalled {
-		return nil
-	}
-	config := args[0]
+func NewBoard(config js.Value) *Board {
 	var (
-		width        = config.Get("width").Float()
-		height       = config.Get("height").Float()
-		nPoints      = config.Get("nPoints").Int()
-		bounceBounds = config.Get("bounceBounds").Bool()
-		kLines       = config.Get("kLines").Int()
+		width        = config.Get("width")
+		height       = config.Get("height")
+		nPoints      = config.Get("nPoints")
+		bounceBounds = config.Get("bounceBounds")
+		kLines       = config.Get("kLines")
+		threshold    = config.Get("threshold")
 	)
-	b.width = width
-	b.height = height
-	b.kLines = kLines
-	b.bounceBounds = bounceBounds
+	if width.IsUndefined() {
+		width = js.ValueOf(400)
+	}
+	if height.IsUndefined() {
+		width = js.ValueOf(400)
+	}
+	if nPoints.IsUndefined() {
+		nPoints = js.ValueOf(100)
+	}
+	if kLines.IsUndefined() {
+		kLines = js.ValueOf(2)
+	}
+	if bounceBounds.IsUndefined() {
+		bounceBounds = js.ValueOf(false)
+	}
+	if threshold.IsUndefined() {
+		threshold = js.ValueOf(20)
+	}
+	b := &Board{
+		width:        width.Float(),
+		height:       height.Float(),
+		nPoints:      nPoints.Int(),
+		kLines:       kLines.Int(),
+		bounceBounds: bounceBounds.Bool(),
+		threshold:    threshold.Float() * 1000,
+	}
+	return b
+}
+
+func (b *Board) Serializer() interface{} {
+	return map[string]interface{}{
+		"initPoints": js.FuncOf(b.InitPoints),
+		"kLines":     js.FuncOf(b.KLines),
+		"getPoints":  js.FuncOf(b.Points),
+		"getLines":   js.FuncOf(b.Lines),
+		"update":     js.FuncOf(b.Update),
+	}
+}
+
+func (b *Board) InitPoints(this js.Value, args []js.Value) interface{} {
 	rand.Seed(time.Now().UnixNano())
-	for i := 0; i < nPoints; i++ {
-		x := math.Floor(rand.Float64() * width)
-		y := math.Floor(rand.Float64() * height)
+	for i := 0; i < b.nPoints; i++ {
+		x := math.Floor(rand.Float64() * b.width)
+		y := math.Floor(rand.Float64() * b.height)
 		d := rand.Float64() * TAU
 		m := lerp(rand.Float64(), 0.1, 0.5)
 		b.points = append(b.points, newPoint(x, y, d, m, b))
 	}
-	b.initCalled = true
 	return nil
 }
+
 func (b *Board) KLines(this js.Value, args []js.Value) interface{} {
 	b.kLines = args[0].Int()
 	return nil
 }
+
 func (b *Board) Threshold(this js.Value, args []js.Value) interface{} {
 	b.threshold = args[0].Float()
 	return nil
 }
 
 func (b *Board) Points(this js.Value, args []js.Value) interface{} {
-	if !b.initCalled {
-		return js.ValueOf("board not initialize")
-	}
 	points := make([]interface{}, len(b.points))
 	for i, p := range b.points {
 		points[i] = p.Serialize()
@@ -65,9 +97,6 @@ func (b *Board) Points(this js.Value, args []js.Value) interface{} {
 	return js.ValueOf(points)
 }
 func (b *Board) Lines(this js.Value, args []js.Value) interface{} {
-	if !b.initCalled {
-		return js.ValueOf("board not initialize")
-	}
 	var lines []interface{}
 	for _, p := range b.points {
 		for _, l := range p.lines {
@@ -78,9 +107,6 @@ func (b *Board) Lines(this js.Value, args []js.Value) interface{} {
 }
 
 func (b *Board) Update(this js.Value, args []js.Value) interface{} {
-	if !b.initCalled {
-		return js.ValueOf("board not initialized")
-	}
 	var wg sync.WaitGroup
 	for _, p := range b.points {
 		wg.Add(1)

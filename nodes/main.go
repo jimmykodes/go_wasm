@@ -8,14 +8,10 @@ import (
 
 func main() {
 	c := make(chan struct{}, 0)
-	b := &internal.Board{}
 	functions := map[string]js.Func{
-		"init":         js.FuncOf(b.Init),
-		"getPoints":    js.FuncOf(b.Points),
-		"getLines":     js.FuncOf(b.Lines),
-		"updatePoints": js.FuncOf(b.Update),
-		"setLineCount": js.FuncOf(b.KLines),
-		"setThreshold": js.FuncOf(b.Threshold),
+		"newBoard": js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			return internal.NewBoard(args[0]).Serializer()
+		}),
 	}
 	for name, f := range functions {
 		js.Global().Set(name, f)

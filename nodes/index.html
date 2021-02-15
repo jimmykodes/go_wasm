@@ -26,14 +26,15 @@
   })
 
   async function main() {
-    let canvas = document.getElementById("canvas")
-    let ctx = canvas.getContext('2d')
-    let dpr = window.devicePixelRatio
-    let width = window.innerWidth
-    let height = window.innerHeight
+    const canvas = document.getElementById("canvas")
+    const ctx = canvas.getContext('2d')
+    const dpr = window.devicePixelRatio
+    const width = window.innerWidth
+    const height = window.innerHeight
     const nPoints = 100
     const bounceBounds = true
-    const kLines = 2
+    const kLines = 3
+    const threshold = 12
     canvas.width = width * dpr
     canvas.height = height * dpr
     canvas.style.width = `${width}px`
@@ -41,15 +42,15 @@
     ctx.scale(dpr, dpr)
     ctx.fillStyle = `rgb(0, 167, 167)`
     ctx.strokeStyle = `rgba(0, 255, 255, .45)`
-    init({ width, height, nPoints, bounceBounds, kLines })
-    setThreshold(10000)
+    let board = newBoard({ width, height, nPoints, bounceBounds, kLines, threshold })
+    board.initPoints()
     let draw = function () {
       ctx.save()
       ctx.fillStyle = `rgb(2, 2, 12)`
       ctx.fillRect(0, 0, width, height)
       ctx.restore()
 
-      let lines = getLines()
+      let lines = board.getLines()
       ctx.beginPath()
       for (let i = 0; i < lines.length; i++) {
         let l = lines[i]
@@ -57,7 +58,7 @@
         ctx.lineTo(l.end.x, l.end.y)
       }
       ctx.stroke()
-      let points = getPoints()
+      let points = board.getPoints()
       ctx.beginPath()
       for (let i = 0; i < nPoints; i++) {
         let p = points[i]
@@ -65,7 +66,7 @@
         ctx.closePath()
       }
       ctx.fill()
-      updatePoints()
+      board.update()
       window.requestAnimationFrame(draw)
     }
     window.requestAnimationFrame(draw)
