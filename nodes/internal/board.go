@@ -22,12 +22,13 @@ func (b *Board) Init(this js.Value, args []js.Value) interface{} {
 	if b.initCalled {
 		return nil
 	}
+	config := args[0]
 	var (
-		width        = args[0].Float()
-		height       = args[1].Float()
-		nPoints      = args[2].Int()
-		bounceBounds = args[3].Bool()
-		kLines       = args[4].Int()
+		width        = config.Get("width").Float()
+		height       = config.Get("height").Float()
+		nPoints      = config.Get("nPoints").Int()
+		bounceBounds = config.Get("bounceBounds").Bool()
+		kLines       = config.Get("kLines").Int()
 	)
 	b.width = width
 	b.height = height

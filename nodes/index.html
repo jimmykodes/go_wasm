@@ -41,21 +41,14 @@
     ctx.scale(dpr, dpr)
     ctx.fillStyle = `rgb(0, 167, 167)`
     ctx.strokeStyle = `rgba(0, 255, 255, .45)`
-    init(width, height, nPoints, bounceBounds, kLines)
+    init({ width, height, nPoints, bounceBounds, kLines })
     setThreshold(10000)
     let draw = function () {
       ctx.save()
       ctx.fillStyle = `rgb(2, 2, 12)`
       ctx.fillRect(0, 0, width, height)
       ctx.restore()
-      let points = getPoints()
-      ctx.beginPath()
-      for (let i = 0; i < nPoints; i++) {
-        let p = points[i]
-        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2)
-        ctx.closePath()
-      }
-      ctx.fill()
+
       let lines = getLines()
       ctx.beginPath()
       for (let i = 0; i < lines.length; i++) {
@@ -64,6 +57,14 @@
         ctx.lineTo(l.end.x, l.end.y)
       }
       ctx.stroke()
+      let points = getPoints()
+      ctx.beginPath()
+      for (let i = 0; i < nPoints; i++) {
+        let p = points[i]
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2)
+        ctx.closePath()
+      }
+      ctx.fill()
       updatePoints()
       window.requestAnimationFrame(draw)
     }
