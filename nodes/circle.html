@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Circle</title>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+  const canvas = document.getElementById("canvas")
+  const ctx = canvas.getContext('2d')
+  const dpr = window.devicePixelRatio
+  const width = window.innerWidth
+  const height = window.innerHeight
+  const cx = Math.floor(width / 2)
+  const cy = Math.floor(height / 2)
+  const r = Math.min(cx, cy)
+  const radius = r * .9
+  const TAU = 2 * Math.PI
+
+  canvas.width = width * dpr
+  canvas.height = height * dpr
+  canvas.style.width = `${width}px`
+  canvas.style.height = `${height}px`
+  ctx.scale(dpr, dpr)
+
+  ctx.fillStyle = `rgb(2, 2, 12)`
+  ctx.fillRect(0, 0, width, height)
+  ctx.fillStyle = `rgb(0, 167, 167)`
+  ctx.strokeStyle = `rgba(0, 255, 255, .45)`
+  ctx.beginPath()
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+  ctx.stroke()
+
+  let t1 = Math.random() * 2 * Math.PI
+  let m1 = (Math.random() * (radius - 100)) + 100
+  let t1x = Math.cos(t1) * m1
+  let t1y = Math.sin(t1) * m1
+
+  let t2 = Math.random() * 2 * Math.PI
+  let m2 = (Math.random() * (radius - 100)) + 100
+  let t2x = Math.cos(t2) * m2
+  let t2y = Math.sin(t2) * m2
+
+  ctx.strokeStyle = 'red'
+  ctx.beginPath()
+  ctx.moveTo(cx, cy)
+  ctx.lineTo(t1x + cx, t1y + cy)
+  ctx.stroke()
+
+  // ctx.strokeStyle = 'rgba(0, 255, 0, .25)'
+  // ctx.beginPath()
+  // ctx.moveTo(cx, cy)
+  // ctx.lineTo(t2x + cx, t2y + cy)
+  // ctx.stroke()
+  ctx.strokeStyle = 'green'
+  ctx.beginPath()
+  ctx.moveTo(t1x + cx, t1y + cy)
+  ctx.lineTo(t2x + cx + t1x, t2y + cy + t1y)
+  ctx.stroke()
+
+  ctx.strokeStyle = 'blue'
+  ctx.beginPath()
+  ctx.moveTo(cx, cy)
+  ctx.lineTo(t2x + cx + t1x, t2y + cy + t1y)
+  ctx.stroke()
+
+  let alpha = Math.PI - t1 + t2
+  let m3 = newMag(m1, m2, alpha)
+  let t3 = newTheta(m1, m2, m3, t1, t2)
+  ctx.strokeStyle = 'yellow'
+  ctx.beginPath()
+  ctx.moveTo(cx, cy)
+  ctx.lineTo(Math.cos(t3) * m3 + cx, Math.sin(t3) * m3 + cy)
+  ctx.stroke()
+  // if ((TAU - t1 + t2) % TAU < Math.PI) {
+  //   ctx.strokeStyle = 'yellow'
+  //   ctx.beginPath()
+  //   ctx.moveTo(cx, cy)
+  //   ctx.lineTo(Math.cos(t3 + t1) * m3 + cx, Math.sin(t3 + t1) * m3 + cy)
+  //   ctx.stroke()
+  // } else {
+  //   ctx.strokeStyle = 'purple'
+  //   ctx.beginPath()
+  //   ctx.moveTo(cx, cy)
+  //   ctx.lineTo(Math.cos((2 * Math.PI) - t3 + t1) * m3 + cx, Math.sin((2 * Math.PI) - t3 + t1) * m3 + cy)
+  //   ctx.stroke()
+  // }
+
+  function newMag(m1, m2, alpha) {
+    return Math.sqrt((m1 ** 2) + (m2 ** 2) - (2 * m1 * m2 * Math.cos(alpha)))
+  }
+
+  function newTheta(m1, m2, m3, t1, t2) {
+    let num = (m1 ** 2) + (m3 ** 2) - (m2 ** 2)
+    let den = 2 * m1 * m3
+    let t3 = Math.acos(num / den)
+    if ((TAU - t1 + t2) % TAU > Math.PI) {
+      t3 = TAU - t3
+    }
+    return t3 + t1
+  }
+</script>
+</body>
+</html>

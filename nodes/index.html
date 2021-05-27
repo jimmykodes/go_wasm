@@ -66,6 +66,10 @@
         ctx.closePath()
       }
       ctx.fill()
+      ctx.save()
+      ctx.fillStyle = 'white'
+      ctx.fillRect(width/ 2- 5, height /2-5, 10, 10)
+      ctx.restore()
       board.update()
       window.requestAnimationFrame(draw)
     }

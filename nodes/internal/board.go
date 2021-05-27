@@ -53,6 +53,13 @@ func NewBoard(config js.Value) *Board {
 		kLines:       kLines.Int(),
 		bounceBounds: bounceBounds.Bool(),
 		threshold:    threshold.Float() * 1000,
+		wells: []*Well{
+			{
+				x:        width.Float() / 2,
+				y:        height.Float() / 2,
+				strength: 10,
+			},
+		},
 	}
 	return b
 }

@@ -22,6 +22,7 @@ func newPoint(x float64, y float64, d float64, m float64, board *Board) *point {
 }
 
 func (p *point) update() {
+	p.updateMag()
 	if p.board.bounceBounds {
 		// reflect off the edges of the board
 		if p.x > p.board.width || p.x < 0 {
@@ -54,16 +55,36 @@ func (p *point) update() {
 
 // todo: figure out why this function doesn't work.
 func (p *point) updateMag() {
-	dx := math.Cos(p.d) * p.m
-	dy := math.Sin(p.d) * p.m
 	for _, well := range p.board.wells {
 		sqrMag := squareMag(p, well)
-		direction := math.Atan(well.y - p.y/well.x - p.x)
+		dy := p.y - well.y
+		dx := p.x - well.x
+		var direction float64
+		if dx != 0 {
+			direction = math.Atan(dy/dx)
+		} else {
+			if p.y > well.y {
+				direction = math.Pi * 1.5
+			} else {
+				direction = math.Pi * .5
+			}
+		}
+		if p.x > well.x {
+			if p.y > well.y {
+				direction = math.Pi + direction
+			} else {
+				direction = math.Pi - direction
+			}
+		} else {
+			if p.y > well.y {
+				direction = TAU - direction
+			}
+		}
 		strength := well.strength / sqrMag
-		dx += math.Cos(direction) * strength
-		dy += math.Sin(direction) * strength
+		newM := m3(p.m, strength, p.d, direction)
+		p.d = t3(p.m, strength, newM, p.d, direction)
+		p.m = newM
 	}
-	p.m = math.Atan(dy/dx)
 }
 
 func (p *point) updateLines() {
